@@ -152,16 +152,16 @@ if st.sidebar.button("Predict Power Demand"):
             st.write(next_day_weather)
             st.markdown('---')
             report = (
-                "### ⚡️ Daily Electricity Demand Forecast – Substation Level  \n"
+                f"### ⚡️ Daily Electricity Demand Forecast {selected_city}  \n"
                     f"*Date: {datetime.now()}*  \n"
                     f"*City: {selected_city}*  \n"
-                    f"This report provides the forecasted electricity demand for the designated substation on {datetime.now()}  \n  \n"
+                    f"This report provides the forecasted electricity demand for {selected_city} on {datetime.now()}  \n  \n"
                     f"#### 🔋 Total Predicted Demand: {total_demand:.2f} MWh.  \n"
                     f"#### ⏰ Anticipated Peak Demand: {peak_demand:.2f} MWh at {peak_row['datetime']}.  \n  \n"
                     f"""This forecast plays a vital role in effective grid operations by supporting optimized generation scheduling and
                     enabling proactive measures during peak demand periods. Accurate predictions contribute directly to maintaining 
                     grid stability and minimizing the risk of disruptions.  \n  \n"""
-                    f"""*⚠️ Note: This forecast reflects demand for a single substation and may not represent the aggregate consumption 
+                    f"""*⚠️ Note: This forecast reflects estimated demand
                     across the entire city. More detailed regional forecasts will be provided in subsequent updates.*""")
             st.markdown(report)
     else:
