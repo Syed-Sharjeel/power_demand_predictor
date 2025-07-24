@@ -6,3 +6,4 @@ retry-requests
 openmeteo-requests
 xgboost
 scikit-learn
+ipywidgets
