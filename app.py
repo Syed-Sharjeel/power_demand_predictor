@@ -64,7 +64,7 @@ def get_coordinates(city_name):
         'limit': 1
     }
     headers = {
-        'User-Agent': 'GeoCoder-Pakistan-Cities/1.0 (your-email@example.com)'  # Replace with your actual contact
+        'User-Agent': 'GeoCoder-Pakistan-Cities/1.0 (syedsharjeel321@gmail.com)'  # Replace with your actual contact
     }
     response = requests.get(url, params=params, headers=headers)
     data = response.json()
@@ -141,8 +141,7 @@ if st.sidebar.button("Predict Power Demand"):
             next_day_weather["Predicted_Power_Demand"] = y_pred
             total_demand = y_pred.sum()
             peak_row = next_day_weather.iloc[np.argmax(y_pred)]
-
-            st.markdown(f"🔋 **Total Predicted Demand (Next Day):** {round(total_demand/1000, 2)} MWh")
+            st.markdown(f"🔋 **Total Predicted Demand (Next Day):** {total_demand} MWh")
             st.markdown(f"⏰ **Peak Hour:** {peak_row['datetime']} with Demand: {round(peak_row['Predicted_Power_Demand']/1000, 2)} MWh")
             st.markdown('---')
             st.subheader("📈 Hourly Power Demand Forecast")
@@ -156,7 +155,7 @@ if st.sidebar.button("Predict Power Demand"):
                     f"*Date: {datetime.now()}*  \n"
                     f"*City: {selected_city}*  \n"
                     f"This report provides the forecasted electricity demand for the designated substation on {datetime.now()}  \n  \n"
-                    f"#### 🔋 Total Predicted Demand: {round(total_demand/1000, 2)} MWh.  \n"
+                    f"#### 🔋 Total Predicted Demand: {total_demand:.2f} MWh.  \n"
                     f"#### ⏰ Anticipated Peak Demand: {round(peak_row['Predicted_Power_Demand']/1000, 2)} MWh at {peak_row['datetime']}.  \n  \n"
                     f"""This forecast plays a vital role in effective grid operations by supporting optimized generation scheduling and
                     enabling proactive measures during peak demand periods. Accurate predictions contribute directly to maintaining 
