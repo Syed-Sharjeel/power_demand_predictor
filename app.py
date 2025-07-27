@@ -46,14 +46,29 @@ import requests
 import ipywidgets as widgets
 from IPython.display import display, clear_output
 
-# List of major cities in Pakistan
-cities = [
-    'Karachi', 'Lahore', 'Islamabad', 'Rawalpindi', 'Faisalabad', 'Multan', 'Peshawar',
-    'Quetta', 'Sialkot', 'Gujranwala', 'Hyderabad', 'Sukkur', 'Bahawalpur', 'Sargodha', 'Abbottabad'
-]
-
+# Data for major cities in Pakistan
+per_capita_demand_kwh = {
+    "Karachi": {"population": 22000000, "per_capita_kwh": 1300},
+    "Lahore": {"population": 13000000, "per_capita_kwh": 1200},
+    "Islamabad": {"population": 1200000, "per_capita_kwh": 1100},
+    "Rawalpindi": {"population": 2100000, "per_capita_kwh": 1000},
+    "Faisalabad": {"population": 3200000, "per_capita_kwh": 1000},
+    "Multan": {"population": 2000000, "per_capita_kwh": 900},
+    "Peshawar": {"population": 2100000, "per_capita_kwh": 850},
+    "Quetta": {"population": 1200000, "per_capita_kwh": 700},
+    "Hyderabad": {"population": 1800000, "per_capita_kwh": 800},
+    "Sialkot": {"population": 920000, "per_capita_kwh": 950},
+    "Gujranwala": {"population": 2000000, "per_capita_kwh": 900},
+    "Bahawalpur": {"population": 850000, "per_capita_kwh": 800},
+    "Sukkur": {"population": 750000, "per_capita_kwh": 750},
+    "Abbottabad": {"population": 250000, "per_capita_kwh": 650},
+    "Mardan": {"population": 370000, "per_capita_kwh": 700},
+    "Default": {"population": 0, "per_capita_kwh": 600}
+}
 # Dropdown for city selection
-selected_city = st.sidebar.selectbox("Select a City", cities)
+selected_city = st.sidebar.selectbox("Select a City", per_capita_demand_kwh.keys())
+capita_demand = per_capita_demand_kwh[selected_city]["per_capita_kwh"]
+population = per_capita_demand_kwh[selected_city]["population"]
 
 # Function to get lat/lon from Nominatim
 def get_coordinates(city_name):
@@ -142,6 +157,9 @@ if st.sidebar.button("Predict Power Demand"):
             total_demand = y_pred.sum()
             peak_row = next_day_weather.iloc[np.argmax(y_pred)]
             peak_demand = peak_row['Predicted_Power_Demand']
+            estimated_annual_kwh = population * capita_demand
+            estimated_daily_mwh = round(estimated_annual_kwh / 365 / 1000, 2)
+            total_demand = (0.7*total_demand) + (0.3*estimated_daily_mwh)
             st.markdown(f"🔋 **Total Predicted Demand (Next Day):** {total_demand:.2f} MWh")
             st.markdown(f"⏰ **Peak Hour:** {peak_row['datetime']} with Demand: {peak_demand:.2f} MWh")
             st.markdown('---')
