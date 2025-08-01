@@ -36,6 +36,7 @@ def model_fit(df):
 
 # Select City using Drop-down and get population
 def city_select():
+    st.sidebar.header("🌍 Location Input")
     cities_data = {
         # Dehli: {population: 22.3M, per_capita_kwh: 1075}, Pakistan 606
         "Karachi": {"population": 18868021},
@@ -138,7 +139,6 @@ def prediction(next_day_weather, model, population):
 
 
 def ui(selected_city, next_day_weather, total_demand, peak_demand, peak_row):
-    st.sidebar.header("🌍 Location Input")
     if st.sidebar.button("Predict Power Demand"):
         lat, lon = get_coordinates(selected_city)
     else:
@@ -147,9 +147,6 @@ def ui(selected_city, next_day_weather, total_demand, peak_demand, peak_row):
         if next_day_weather.empty:
             st.error("⚠️ Weather data for the next day is not available. Try again later.")
         else:
-            st.title("⚡ Power Demand Predictor")
-            st.markdown("Predicts next day's electricity consumption for a single district using weather forecast data.")
-            st.markdown('---')
             st.markdown(f"🔋 **Total Predicted Demand (Next Day):** {total_demand:.2f} MWh")
             st.markdown(f"⏰ **Peak Hour:** {peak_row['datetime']} with Demand: {peak_demand:.2f} MWh")
             st.markdown('---')
@@ -181,5 +178,7 @@ def workflow():
     next_day_weather = get_weather(lat, lon)
     total_demand, peak_demand, peak_row = prediction(next_day_weather, model, population)
     ui(selected_city, next_day_weather, total_demand, peak_demand, peak_row)
-if __name__ == "__main__":
-    workflow()
+st.title("⚡ Power Demand Predictor")
+st.markdown("Predicts next day's electricity consumption for a single district using weather forecast data.")
+st.markdown('---')
+workflow()
