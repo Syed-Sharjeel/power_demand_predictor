@@ -35,42 +35,23 @@ def model_fit(df):
 
 
 # Select City using Drop-down and get population
+# Get Latidtude and Longitude of Selected City
 def city_select():
     st.sidebar.header("🌍 Location Input")
     cities_data = {
         # Dehli: {population: 22.3M, per_capita_kwh: 1075}, Pakistan 606
-        "Karachi": {"population": 18868021},
-        "Lahore": {"population": 13004135},
-        "Islamabad": {"population": 1108872},
-        "Peshawar": {"population": 1905975},
-        "Quetta": {"population": 1565546},
+        "Karachi": {"population": 18868021, "lat": 24.8546842, "lon": 67.0207055},
+        "Lahore": {"population": 13004135, "lat": 31.5656822, "lon": 74.3141829},
+        "Islamabad": {"population": 1108872, "lat": 33.6938118, "lon": 73.0651511},
+        "Peshawar": {"population": 1905975, "lat": 34.012384, "lon": 71.5787458},
+        "Quetta": {"population": 1565546, "lat": 30.1916569, "lon": 67.0006542},
     }
     # Dropdown for city selection
     selected_city = st.sidebar.selectbox("Select a City", cities_data.keys())
     population = cities_data[selected_city]["population"]
-    return selected_city, population
-
-# Get Latidtude and Longitude of Selected City
-def get_coordinates(city_name):
-    url = "https://nominatim.openstreetmap.org/search"
-    params = {
-        'q': city_name + ", Pakistan",
-        'format': 'json',
-        'limit': 1
-    }
-    headers = {
-        'User-Agent': 'GeoCoder-Pakistan-Cities/1.0 (syedsharjeel321@gmail.com)'
-    }
-    response = requests.get(url, params=params, headers=headers)
-    data = response.json()
-
-    if data:
-        lat = float(data[0]['lat'])
-        lon = float(data[0]['lon'])
-        return lat, lon
-    else:
-        return None, None
-    
+    lat = cities_data[selected_city]["lat"]
+    lon = cities_data[selected_city]["lon"]
+    return selected_city, population, lat, lon
 
 # Get Weather Information for Selected City
 def get_weather(lat, lon):
@@ -138,46 +119,42 @@ def prediction(next_day_weather, model, population):
     return adjusted_total_demand, adjusted_peak_demand, peak_row
 
 
-def ui(selected_city, next_day_weather, total_demand, peak_demand, peak_row):
-    if st.sidebar.button("Predict Power Demand"):
-        lat, lon = get_coordinates(selected_city)
+def ui(selected_city, next_day_weather, total_demand, peak_demand, peak_row, lat, lon):
+    
+    if next_day_weather.empty:
+        st.error("⚠️ Weather data for the next day is not available. Try again later.")
     else:
-        return None
-    if lat and lon:
-        if next_day_weather.empty:
-            st.error("⚠️ Weather data for the next day is not available. Try again later.")
-        else:
-            st.markdown(f"🔋 **Total Predicted Demand (Next Day):** {total_demand:.2f} MWh")
-            st.markdown(f"⏰ **Peak Hour:** {peak_row['datetime']} with Demand: {peak_demand:.2f} MWh")
-            st.markdown('---')
-            st.subheader("📈 Hourly Power Demand Forecast")
-            st.line_chart(next_day_weather.set_index("datetime")["Predicted_Power_Demand"])
-            st.markdown('---')
-            st.subheader("Hourly Prediction")
-            st.write(next_day_weather)
-            st.markdown('---')
-            report = (
-                f"### ⚡️ Daily Electricity Demand Forecast {selected_city}  \n"
-                    f"*Date: {datetime.now()}*  \n"
-                    f"*City: {selected_city}*  \n"
-                    f"This report provides the forecasted electricity demand for {selected_city} on {datetime.now()}  \n  \n"
-                    f"#### 🔋 Total Predicted Demand: {total_demand:.2f} MWh.  \n"
-                    f"#### ⏰ Anticipated Peak Demand: {peak_demand:.2f} MWh at {peak_row['datetime']}.  \n  \n"
-                    f"""This forecast plays a vital role in effective grid operations by supporting optimized generation scheduling and
-                    enabling proactive measures during peak demand periods. Accurate predictions contribute directly to maintaining 
-                    grid stability and minimizing the risk of disruptions.  \n  \n"""
-                    f"""*⚠️ Note: This forecast reflects estimated demand
-                    across the entire city. More detailed regional forecasts will be provided in subsequent updates.*""")
-            st.markdown(report)
+        st.markdown(f"🔋 **Total Predicted Demand (Next Day):** {total_demand:.2f} MWh")
+        st.markdown(f"⏰ **Peak Hour:** {peak_row['datetime']} with Demand: {peak_demand:.2f} MWh")
+        st.markdown('---')
+        st.subheader("📈 Hourly Power Demand Forecast")
+        st.line_chart(next_day_weather.set_index("datetime")["Predicted_Power_Demand"])
+        st.markdown('---')
+        st.subheader("Hourly Prediction")
+        st.write(next_day_weather)
+        st.markdown('---')
+        report = (
+            f"### ⚡️ Daily Electricity Demand Forecast {selected_city}  \n"
+                f"*Date: {datetime.now()}*  \n"
+                f"*City: {selected_city}*  \n"
+                f"This report provides the forecasted electricity demand for {selected_city} on {datetime.now()}  \n  \n"
+                f"#### 🔋 Total Predicted Demand: {total_demand:.2f} MWh.  \n"
+                f"#### ⏰ Anticipated Peak Demand: {peak_demand:.2f} MWh at {peak_row['datetime']}.  \n  \n"
+                f"""This forecast plays a vital role in effective grid operations by supporting optimized generation scheduling and
+                enabling proactive measures during peak demand periods. Accurate predictions contribute directly to maintaining 
+                grid stability and minimizing the risk of disruptions.  \n  \n"""
+                f"""*⚠️ Note: This forecast reflects estimated demand
+                across the entire city. More detailed regional forecasts will be provided in subsequent updates.*""")
+        st.markdown(report)
 
 def workflow():
     df = load_data()
     model = model_fit(df)
-    selected_city, population = city_select()
-    lat, lon = get_coordinates(selected_city)
+    selected_city, population, lat, lon = city_select()
     next_day_weather = get_weather(lat, lon)
     total_demand, peak_demand, peak_row = prediction(next_day_weather, model, population)
-    ui(selected_city, next_day_weather, total_demand, peak_demand, peak_row)
+    if st.sidebar.button('Predict Power Demand'):
+        ui(selected_city, next_day_weather, total_demand, peak_demand, peak_row, lat, lon)
 st.title("⚡ Power Demand Predictor")
 st.markdown("Predicts next day's electricity consumption for a single district using weather forecast data.")
 st.markdown('---')
